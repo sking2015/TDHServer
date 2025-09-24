@@ -1,9 +1,13 @@
 <?php
-class User {
+class User
+{
     public $account;
     public $userid;
 
-    public function __construct($account, $userid) {
+    public $money;
+
+    public function __construct($account, $userid)
+    {
         $this->account = $account;
         $this->userid  = $userid;
     }

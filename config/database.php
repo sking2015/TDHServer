@@ -2,8 +2,8 @@
 // 数据库配置
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'tdhgame');
-define('DB_USER', 'root');
-define('DB_PASS', 'tdh20250923');
+define('DB_USER', 'tdhadmin');
+define('DB_PASS', 'tdhgame20250923');
 
 return [
     "host" => DB_HOST,

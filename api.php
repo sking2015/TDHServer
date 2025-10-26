@@ -21,5 +21,7 @@ echo json_encode([
     "status"  => "ok",
     "account" => $user->account,
     "userid"  => $user->userid,
-    "money"   => $user->money
+    "money"   => $user->money,
+
+    "role"    => $user->role
 ]);

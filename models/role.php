@@ -1,6 +1,8 @@
 <?php
 
 define("ROLE_HP", 100);
+define("ROLE_LV", 1);
+define("ROLE_EXP", 0);
 define("ROLE_SP", 100);
 define("ROLE_ATK", 20);
 define("ROLE_DEF", 5);
@@ -12,6 +14,8 @@ class Role
 {
     public $userid;             //用户id
     public $hp;                 //血量
+    public $lv;                 //等级
+    public $exp;                //经验值
     public $sp;                 //技能点
     public $atk;                //攻击力
     public $def;                //防御力
@@ -26,6 +30,8 @@ class Role
 
     public function InitDefaultPerproty()
     {
+        $this->lv = ROLE_LV;
+        $this->exp = ROLE_EXP;
         $this->hp = ROLE_HP;
         $this->sp = ROLE_SP;
         $this->atk = ROLE_ATK;

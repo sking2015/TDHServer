@@ -51,6 +51,8 @@ class UserService
 
         if ($row) {
             $role = new Role($userid);
+            $role->lv = $row["lv"];
+            $role->exp = $row["exp"];
             $role->hp = $row["hp"];
             $role->sp = $row["sp"];
             $role->atk = $row["atk"];
@@ -65,8 +67,8 @@ class UserService
         $role = new Role($userid);
         $role->InitDefaultPerproty();
 
-        $stmt = $this->pdo->prepare("INSERT INTO role_data (user_id, hp, sp, atk, def, cri, crd, atk_rate) VALUES (?,?,?,?,?,?,?,?)");
-        $stmt->execute([$userid, $role->hp, $role->sp, $role->atk, $role->def, $role->cri, $role->crd, $role->atk_rate]);
+        $stmt = $this->pdo->prepare("INSERT INTO role_data (user_id, lv,exp,hp, sp, atk, def, cri, crd, atk_rate) VALUES (?,?,?,?,?,?,?,?,?,?)");
+        $stmt->execute([$userid, $role->lv, $role->exp, $role->hp, $role->sp, $role->atk, $role->def, $role->cri, $role->crd, $role->atk_rate]);
 
         return $role;
     }

@@ -63,7 +63,7 @@ class Stage
         }
 
         $info = [];
-        $info["monster_alloc"] = $allMonster;
+        $info["monsterAlloc"] = $allMonster;
 
         $monsterDef = [];
 
@@ -71,7 +71,7 @@ class Stage
             $monsterDef[$key] = $this->getMonsterInfo($key);
         }
 
-        $info["monster_def"] = $monsterDef;
+        $info["monsterDef"] = $monsterDef;
 
         return $info;
     }

@@ -4,6 +4,8 @@ $secret = 'sking2025fortdhserver#$'; // 与 GitHub 设置的 secret 一致
 $project_dir = '/home/TDHGame/TDHServer';
 $log_file = '/home/TDHGame/deploy.log'; // 可选：记录执行日志
 
+file_put_contents('/var/www/html/webhook.log', date('c') . " Incoming\n", FILE_APPEND);
+
 // === 校验签名 ===
 $hubSignature = $_SERVER['HTTP_X_HUB_SIGNATURE_256'] ?? '';
 $payload = file_get_contents('php://input');

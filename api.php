@@ -6,8 +6,11 @@ header("Access-Control-Allow-Credentials: true");
 
 header("Content-Type: application/json; charset=utf-8");
 
+define("CONST_INI", __DIR__ . '/data/const.ini');
+
 require_once __DIR__ . "/services/userservice.php";
 require_once __DIR__ . "/common/common.php";
+require_once __DIR__ . "/config/constdef.php";
 require_once __DIR__ . "/models/stage.php";
 
 
@@ -18,7 +21,7 @@ if (!$reqType) {
 }
 
 
-function onLoing()
+function onLoging()
 {
     $account = $_REQUEST["account"] ?? null;
     if (!$account) {
@@ -36,6 +39,17 @@ function onLoing()
         "money"   => $user->money,
 
         "role"    => $user->role
+    ]);
+}
+
+function onGameInfo()
+{
+    $dataconfig = parse_ini_file(CONST_INI);
+    $dataversion = $dataconfig["version"];
+    echo json_encode([
+        "status"  => "ok",
+        "version" => VERSION,
+        "dversion" =>  $dataversion
     ]);
 }
 
@@ -60,9 +74,12 @@ function onLoadStageInfo()
 
 switch ($reqType) {
     case "login":
-        onLoing();
+        onLoging();
         break;
     case "stageinfo":
         onLoadStageInfo();
+        break;
+    case "gameinfo":
+        onGameInfo();
         break;
 }

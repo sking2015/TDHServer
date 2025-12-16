@@ -55,10 +55,10 @@ function onGameInfo()
 
 function onLoadStageInfo()
 {
-    $stageid = $_REQUEST["stageid"] ?? null;
-    $phaseid = $_REQUEST["phaseid"] ?? null;
+    if (isset($_REQUEST["stageid"]) && isset($_REQUEST["phaseid"])) {
 
-    if ($stageid && $phaseid) {
+        $stageid = (int)$_REQUEST["stageid"];
+        $phaseid = (int)$_REQUEST["phaseid"];
         $stage = new Stage($stageid);
         $info = $stage->getOnePhaseInfo($phaseid);
         echo json_encode([

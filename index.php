@@ -1,2 +1,3 @@
 <?php
-echo "Hello, this is TDHGame project!";
+//echo "Hello, this is TDHGame project!";
+phpinfo();

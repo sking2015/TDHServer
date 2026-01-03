@@ -1,15 +1,34 @@
 <?php
 require_once __DIR__ . "/../core/dbconn.php";
+require_once __DIR__ . "/../models/gamedata.php";
 require_once __DIR__ . "/../models/user.php";
 require_once __DIR__ . "/../models/role.php";
+require_once __DIR__ . "/../services/tokenmanager.php";
+
 
 class UserService
 {
     private $pdo;
+    private $auth;
 
     public function __construct()
     {
         $this->pdo = DbConn::getConnection();
+        $this->auth = new TokenManager();
+    }
+
+    public function verifyToken($userid, $token)
+    {
+        $checkid = $this->auth->verifyToken($token);
+        if ($checkid && $checkid == $userid) {
+            return true;
+        }
+    }
+
+    public function gameDataUpdate($userid, $eReason, $sPara, $nPara)
+    {
+        $gamedata = new GameDataController($userid, $this->pdo);
+        $gamedata->updateGameData($eReason, $sPara, $nPara);
     }
 
     public function getOrCreateUser($account)
@@ -37,7 +56,12 @@ class UserService
             $user->money = $money;
         }
 
+
         $user->role = $this->getOrCreateRole($user->userid);
+        $user->token = $this->auth->generateToken($user->userid);
+
+        $gamedata = new GameDataController($user->userid, $this->pdo);
+        $user->readGamedata($gamedata);
 
         return $user;
     }

@@ -42,13 +42,13 @@ class GameDataController
         $stmt->execute([$this->userid]);
         $row = $stmt->fetch();
         if ($row) {
-            $this->curProgress = $row["unlockprogress"];
+            $this->curProgress = $row["currprogress"];
             $this->unlockProgress = $row["unlockprogress"];
             $this->coin = $row["coin"];
             $this->diamond = $row["diamond"];
         } else {
             $stmt = $this->pdo->prepare("INSERT INTO game_data (userid,unlockprogress,currprogress,coin,diamond) VALUES (?, ?,?,?,?)");
-            $stmt->execute([$this->userid, $this->curProgress, $this->unlockProgress, $this->coin, $this->diamond]);
+            $stmt->execute([$this->userid, $this->unlockProgress, $this->curProgress, $this->coin, $this->diamond]);
         }
     }
 
@@ -83,6 +83,23 @@ class GameDataController
         [$stage, $phase] = array_map('intval', explode('-', $progress));
         [$ulstage, $ulphase] = array_map('intval', explode('-', $this->unlockProgress));
         $bReset = false;
+
+        $newProgress = $progress;
+
+        if ($this->reason == eGameUpdataReason::er_battleClear) {
+            //如果是完成关卡，那么当前phase前进1            
+            if ($phase >= 6) {
+                $this->curProgress = "0-0";
+            } else {
+                //如果小于6，则当前进度要前进1
+                ++$phase;
+                $newProgress = $stage . "-" . $phase;
+                $this->curProgress = $newProgress;
+            }
+        }
+
+
+
         if ($stage == $ulstage + 1) {
             $ulstage = $stage;
             $bReset = true;
@@ -92,11 +109,7 @@ class GameDataController
         }
 
         if ($bReset) {
-            $this->unlockProgress = $progress;
-        }
-
-        if ($this->reason == eGameUpdataReason::er_battleClear && $phase == 6) {
-            $this->curProgress = "0-0";
+            $this->unlockProgress = $newProgress;
         }
     }
 

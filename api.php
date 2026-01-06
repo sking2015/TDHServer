@@ -6,6 +6,8 @@ header("Access-Control-Allow-Credentials: true");
 
 header("Content-Type: application/json; charset=utf-8");
 
+require 'vendor/autoload.php';
+
 define("CONST_INI", __DIR__ . '/data/const.ini');
 
 require_once __DIR__ . "/services/userservice.php";

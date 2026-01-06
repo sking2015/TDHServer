@@ -1,14 +1,19 @@
 <?php
 
-define("STAGE_MONSTER_ALLOC_CSV", __DIR__ . '/../data/Level Monster Allocation.csv');
-define("MONSTERS_CSV", __DIR__ . '/../data/Monster Attributes.csv');
-define("STAGE_AWARD_INFO_CSV", __DIR__ . '/../data/StageAwardInfo.csv');
-define("DROP_AWARD_CSV", __DIR__ . '/../data/DropAward.csv');
+// define("STAGE_MONSTER_ALLOC_CSV", __DIR__ . '/../data/Level Monster Allocation.csv');
+// define("MONSTERS_CSV", __DIR__ . '/../data/Monster Attributes.csv');
+// define("STAGE_AWARD_INFO_CSV", __DIR__ . '/../data/StageAwardInfo.csv');
+// define("DROP_AWARD_CSV", __DIR__ . '/../data/DropAward.csv');
 define("PHASE_PREFIX", "Phase");
 define("PHASE_BOSS", "PhaseBoss");
-define("STAGE_ID", "StageId");
-define("MONSTER_ID", "Id");
-define("DROP_ID", "ID");
+// define("STAGE_ID", "StageId");
+// define("MONSTER_ID", "Id");
+// define("DROP_ID", "ID");
+
+use Data\MonsterAlloc;
+use Data\StageConfig;
+use Data\DropAward;
+use Data\MonsterAttributes;
 
 class Stage
 {
@@ -23,7 +28,10 @@ class Stage
     private function loadMosterAllocInfo()
     {
         try {
-            $result = findCsvRowByColumn(STAGE_MONSTER_ALLOC_CSV, STAGE_ID, $this->stageid);
+            $allMonsters = MonsterAlloc::$data;
+
+            // $result = findCsvRowByColumn(STAGE_MONSTER_ALLOC_CSV, STAGE_ID, $this->stageid);
+            $result = $allMonsters[$this->stageid];
             if ($result) {
                 $this->monster_alloc = $result;
                 // echo json_encode([
@@ -43,7 +51,9 @@ class Stage
     private function loadStageDropAward()
     {
         try {
-            $result = findCsvRowByColumn(STAGE_AWARD_INFO_CSV, STAGE_ID, $this->stageid);
+            $stageAward = StageConfig::$data;
+            //$result = findCsvRowByColumn(STAGE_AWARD_INFO_CSV, STAGE_ID, $this->stageid);
+            $result = $stageAward[$this->stageid];
             if ($result) {
                 $this->award_info = $result;
             } else {
@@ -62,13 +72,15 @@ class Stage
 
     private function getDropAwardInfo($dropawrdid)
     {
-        $result = findCsvRowByColumn(DROP_AWARD_CSV, DROP_ID, $dropawrdid);
+        // $result = findCsvRowByColumn(DROP_AWARD_CSV, DROP_ID, $dropawrdid);        
+        $result = DropAward::$data[$dropawrdid];
         return $result;
     }
 
     public function getMonsterInfo($monsterId)
     {
-        $result = findCsvRowByColumn(MONSTERS_CSV, MONSTER_ID, $monsterId);
+        $result = MonsterAttributes::$data[$monsterId];
+        // $result = findCsvRowByColumn(MONSTERS_CSV, MONSTER_ID, $monsterId);
         return $result;
     }
 
@@ -79,16 +91,18 @@ class Stage
 
         $phaseName = "";
 
+        $info = [];
+
         if ($phaseId == 0) {
             $phaseName = PHASE_BOSS;
+            //BOSS关卡的掉落要打完才能确定
         } else {
             $phaseName = PHASE_PREFIX . $phaseId;
+            $dropid = $this->award_info[$phaseName];
+            $dropinfo = $this->getDropAwardInfo($dropid);
+            $info["dropinfo"] = $dropinfo;
         }
 
-
-        $dropid = $this->award_info[$phaseName];
-
-        $dropinfo = $this->getDropAwardInfo($dropid);
 
         $allMonster = [];
 
@@ -102,7 +116,7 @@ class Stage
             $allMonster[$monsterId] = $monsterNum;
         }
 
-        $info = [];
+
         $info["monsterAlloc"] = $allMonster;
 
         $monsterDef = [];
@@ -113,7 +127,7 @@ class Stage
 
         $info["monsterDef"] = $monsterDef;
 
-        $info["dropinfo"] = $dropinfo;
+
 
         return $info;
     }

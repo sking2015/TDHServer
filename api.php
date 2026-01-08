@@ -80,7 +80,7 @@ function onLoadStageInfo()
     }
 }
 
-function onGameUpdata()
+function onGameUniMessage()
 {
     if (!isset($_REQUEST["userid"]) || !isset($_REQUEST["token"])) {
         echo json_encode([
@@ -91,9 +91,10 @@ function onGameUpdata()
     $userService = new UserService();
     $userid = $_REQUEST["userid"];
     if ($userService->verifyToken($userid, $_REQUEST["token"])) {
-        $userService->gameDataUpdate($userid, $_REQUEST["reason"], $_REQUEST["sPara"], $_REQUEST["nPara"]);
+        $data = $userService->onGameUniMessage($userid, $_REQUEST["reason"], $_REQUEST["sPara"], $_REQUEST["nPara"]);
         echo json_encode([
             "status"  => "ok",
+            "data" => $data
         ]);
     } else {
         echo json_encode([
@@ -112,7 +113,7 @@ switch ($reqType) {
     case "gameinfo":
         onGameInfo();
         break;
-    case "gamedata":
-        onGameUpdata();
+    case "uniMessage":
+        onGameUniMessage();
         break;
 }

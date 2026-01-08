@@ -5,12 +5,12 @@ class MonsterAlloc {
     public static $data = [
     1 => [
     'StageId' => 1,
-    'Phase1' => '1+5,2+3',
-    'Phase2' => '1+3,2+5',
-    'Phase3' => '1+5,2+4',
-    'Phase4' => '1+6,2+4',
-    'Phase5' => '1+2,2+5',
-    'PhaseBoss' => '1+1'
+    'Phase1' => '1+5,21+3',
+    'Phase2' => '2+3,22+5',
+    'Phase3' => '3+5,23+4',
+    'Phase4' => '4+6,24+4',
+    'Phase5' => '5+2,25+5',
+    'PhaseBoss' => '20+1'
 ]
 ];
 }

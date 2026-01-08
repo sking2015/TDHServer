@@ -1,12 +1,13 @@
 <?php
 require_once __DIR__ . "/../core/dbconn.php";
 
-enum eGameUpdataReason: int
+enum eGameUniMessage: int
 {
-    case er_None = 0;       //纯查询，不更新数据
-    case er_battleStart = 1; //战斗开始
-    case er_battleClear = 2; //一个phase战斗完成
-    case er_battleFail = 3; //战斗失败
+    case eum_None = 0;       //纯查询，不更新数据
+    case eum_battleStart = 1; //战斗开始
+    case eum_battleClear = 2; //一个phase战斗完成
+    case eum_battleFail = 3; //战斗失败
+    case eum_getRoleData = 4; //请求角色数据
 }
 
 
@@ -86,7 +87,7 @@ class GameDataController
 
         $newProgress = $progress;
 
-        if ($this->reason == eGameUpdataReason::er_battleClear) {
+        if ($this->reason == eGameUniMessage::eum_battleClear) {
             //如果是完成关卡，那么当前phase前进1            
             if ($phase >= 6) {
                 $this->curProgress = "0-0";
@@ -113,23 +114,36 @@ class GameDataController
         }
     }
 
-    public function updateGameData($eReson, $sPara, $nPara)
+    private function getRoleData($level)
     {
-        $this->reason = eGameUpdataReason::tryFrom($eReson);
+        $role = new Role($this->userid);
+        $role->setLevel($level);
+
+        return $role;
+    }
+
+    public function onGameUniMessage($eReson, $sPara, $nPara)
+    {
+        $ret = null;
+        $this->reason = eGameUniMessage::tryFrom($eReson);
         if ($this->reason === null) {
             // 处理无效值的情况
             echo "错误：接收到了无效的状态码 " . $eReson;
         } else {
             switch ($this->reason) {
-                case eGameUpdataReason::er_battleClear:
-                case eGameUpdataReason::er_battleStart:
-                case eGameUpdataReason::er_battleFail:
+                case eGameUniMessage::eum_getRoleData:
+                    $ret = $this->getRoleData($nPara);
+                    break;
+                case eGameUniMessage::eum_battleClear:
+                case eGameUniMessage::eum_battleStart:
+                case eGameUniMessage::eum_battleFail:
                     $this->curProgress = $sPara;
                     $this->processGameData();
+                    $this->saveGameData();
                     break;
             }
-
-            $this->saveGameData();
         }
+
+        return ["role" => $ret];
     }
 }

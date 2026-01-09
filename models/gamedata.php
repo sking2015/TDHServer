@@ -23,6 +23,7 @@ class GameDataController
     public $unlockProgress;
     public $coin;
     public $diamond;
+    public $curLevel;               //若保存了当前进度，要一并保存当前等级（以后可能还有其它数据，先就只等级吧）
 
     public function __construct($id, $pdo)
     {
@@ -76,6 +77,12 @@ class GameDataController
             $this->diamond,
             $this->userid
         ]);
+
+
+        //只有胜利会保存角色等级
+        if ($this->reason == eGameUniMessage::eum_battleClear) {
+            $this->saveRoleLevel();
+        }
     }
 
     private function processGameData()
@@ -122,6 +129,19 @@ class GameDataController
         return $role;
     }
 
+    private function saveRoleLevel()
+    {
+        // 获取数据库对象
+        $db = MongoConn::getDB();
+        $collection = $db->selectCollection('roles');
+
+        $collection->updateOne(
+            ['user_id' => (int)$this->userid],        // 查询条件
+            ['$set' => ['level' => (int)$this->curLevel]],    // 更新指令 (务必带上 $set)
+            ['upsert' => true]             // 关键选项：开启 upsert
+        );
+    }
+
     public function onGameUniMessage($eReson, $sPara, $nPara)
     {
         $ret = null;
@@ -138,6 +158,7 @@ class GameDataController
                 case eGameUniMessage::eum_battleStart:
                 case eGameUniMessage::eum_battleFail:
                     $this->curProgress = $sPara;
+                    $this->curLevel = (int)$nPara;
                     $this->processGameData();
                     $this->saveGameData();
                     break;

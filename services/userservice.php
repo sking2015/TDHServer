@@ -68,31 +68,37 @@ class UserService
 
     public function getOrCreateRole($userid)
     {
-        // 1. 查询
-        $stmt = $this->pdo->prepare("SELECT * FROM role_data WHERE user_id = ?");
-        $stmt->execute([$userid]);
-        $row = $stmt->fetch();
+        // 1. 查询,角色数据不再使用mysql
+        // $stmt = $this->pdo->prepare("SELECT * FROM role_data WHERE user_id = ?");
+        // $stmt->execute([$userid]);
+        // $row = $stmt->fetch();
 
-        if ($row) {
+        $db = MongoConn::getDB();
+        $collection = $db->selectCollection('roles');
+
+        $roledata = $collection->findOne(['user_id' => $userid]);
+
+        if ($roledata) {
             $role = new Role($userid);
-            $role->level = $row["lv"];
-            $role->exp = $row["exp"];
-            $role->hp = $row["hp"];
-            $role->sp = $row["sp"];
-            $role->atk = $row["atk"];
-            $role->def = $row["def"];
-            $role->cri = $row["cri"];
-            $role->crd = $row["crd"];
-            $role->atk_rate = $row["atk_rate"];
+            $role->setLevel($roledata["level"]);
+
             return $role;
         }
 
-        // 2. 新建角色
+        // // 2. 新建角色
         $role = new Role($userid);
         $role->InitDefaultPerproty();
 
-        $stmt = $this->pdo->prepare("INSERT INTO role_data (user_id, lv,exp,hp, sp, atk, def, cri, crd, atk_rate) VALUES (?,?,?,?,?,?,?,?,?,?)");
-        $stmt->execute([$userid, $role->level, $role->exp, $role->hp, $role->sp, $role->atk, $role->def, $role->cri, $role->crd, $role->atk_rate]);
+        // 准备数据
+        $newData = [
+            'user_id' => $userid,
+            'level'     => 1,
+        ];
+
+        $collection->insertOne($newData);
+
+        // $stmt = $this->pdo->prepare("INSERT INTO role_data (user_id, lv,exp,hp, sp, atk, def, cri, crd, atk_rate) VALUES (?,?,?,?,?,?,?,?,?,?)");
+        // $stmt->execute([$userid, $role->level, $role->exp, $role->hp, $role->sp, $role->atk, $role->def, $role->cri, $role->crd, $role->atk_rate]);
 
         return $role;
     }

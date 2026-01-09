@@ -5,7 +5,7 @@ use Data\RoleConfig;
 define("ROLE_HP", 100);
 define("ROLE_LV", 1);
 define("ROLE_EXP", 0);
-define("ROLE_SP", 100);
+define("ROLE_SP", 0);
 define("ROLE_ATK", 20);
 define("ROLE_DEF", 5);
 define("ROLE_CRI", 5);

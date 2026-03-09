@@ -1,5 +1,21 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:7456");
+// 1. 定义允许的来源列表
+$allowed_origins = [
+    'http://127.0.0.1',           // 本地浏览器测试
+    'http://localhost',           // Android Capacitor 默认
+    'capacitor://localhost',      // iOS Capacitor 默认
+    'http://localhost:7456'       // 你之前的调试地址
+];
+
+// 2. 获取当前请求的 Origin
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+// 3. 检查当前 Origin 是否在允许列表中
+if (in_array($origin, $allowed_origins)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+}
+
+
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Allow-Credentials: true");

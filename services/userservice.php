@@ -31,6 +31,66 @@ class UserService
         return $gamedata->onGameUniMessage($eReason, $sPara, $nPara);
     }
 
+    public function getSalt()
+    {
+        return $this->auth->genSalt();
+    }
+
+    public function RegisterUser($token, $sign, $saltid, $timestamp)
+    {
+        //时间在五分钟内有效
+        $allowedTimeDrift = 300;
+
+        $serverTime = time();
+        if (abs($serverTime - (int)$timestamp) > $allowedTimeDrift) {
+            die(json_encode(["status" => "error", "msg" => "请求已过期，请校准手机时间"]));
+        }
+
+        $salt = $this->auth->getSalt($saltid);
+        if (!$salt) {
+            // 可能是盐值过期了，或者是有人拿随机 saltId 乱撞
+            die(json_encode(["status" => "error", "msg" => "验证凭证已失效，请重新登录"]));
+        }
+
+        //如果已经有了，不注册直接返回account
+        $account = $this->getAccountByAuthToken($token);
+        if ($account) {
+            return $account;
+        }
+
+        // --- 第三步：验签 (核心逻辑) ---
+        // 拼接格式必须与 Java/Web 完全对齐：uuid:timestamp:salt
+        $rawStr = $token . ":" . $salt . ":" . $timestamp;
+
+        $expectedSign = md5($rawStr);
+
+        if ($sign !== $expectedSign) {
+            // 签名不一致，说明 uuid 或 timestamp 被改过，或者是盐对不上
+            die(json_encode(["status" => "error", "msg" => "安全校验未通过，非法请求"]));
+        }
+
+        $stmt = $this->pdo->prepare("INSERT INTO auth_device VALUES (?,?);");
+        $stmt->execute([$token, $token]); //token和账号全用一个，以后如果玩家想改账号时再只改account字段
+
+        //返回token作为账号
+        return $token;
+    }
+
+
+
+    //根据auth token取得account
+    public function getAccountByAuthToken($token)
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM auth_device WHERE token = ?");
+        $stmt->execute([$token]);
+        $row = $stmt->fetch();
+        if ($row) {
+            return $row["account"];
+        } else {
+            return false;
+        }
+    }
+
     public function getOrCreateUser($account)
     {
         // 1. 查询

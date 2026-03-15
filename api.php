@@ -39,15 +39,8 @@ if (!$reqType) {
     echo json_encode(["status" => "error", "message" => "Missing parameter: reqType"]);
 }
 
-
-function onLoging()
+function thowUser($account)
 {
-    $account = $_REQUEST["account"] ?? null;
-    if (!$account) {
-        echo json_encode(["status" => "error", "message" => "Missing parameter: account"]);
-        exit;
-    }
-
     $userService = new UserService();
     $user = $userService->getOrCreateUser($account);
 
@@ -64,6 +57,18 @@ function onLoging()
         "coin"      =>  $user->coin,
         "diamond"   =>  $user->diamond,
     ]);
+}
+
+
+function onLoging()
+{
+    $account = $_REQUEST["account"] ?? null;
+    if (!$account) {
+        echo json_encode(["status" => "error", "message" => "Missing parameter: account"]);
+        exit;
+    }
+
+    thowUser($account);
 }
 
 function onGameInfo()
@@ -119,7 +124,62 @@ function onGameUniMessage()
     }
 }
 
+function onReqSalt()
+{
+    $userService = new UserService();
+    $salt = $userService->getSalt();
+    if ($salt) {
+        echo json_encode([
+            "status"  => "ok",
+            "data" => $salt
+        ]);
+    } else {
+        echo json_encode([
+            "status"  => "取盐失败，同ip段请求是否过于频繁",
+        ]);
+    }
+}
+
+function onTokenLogin()
+{
+    $token = $_REQUEST["token"] ?? null;
+    if ($token) {
+        $userService = new UserService();
+        $account = $userService->getAccountByAuthToken($token);
+        if ($account) {
+            thowUser($account);
+        }
+    }
+}
+
+function onRegister()
+{
+    $userService = new UserService();
+
+    $token = $_REQUEST["token"];
+    $sign = $_REQUEST["sign"];
+    $saltId = $_REQUEST["saltId"];
+    $timestamp = $_REQUEST["timestamp"];
+
+    //验证token注册账号
+    $account = $userService->RegisterUser($token, $sign, $saltId, $timestamp);
+
+    echo json_encode([
+        "status"  => "ok",
+        "account" => $account
+    ]);
+}
+
 switch ($reqType) {
+    case "salt":
+        onReqSalt();
+        break;
+    case "register":
+        onRegister();
+        break;
+    case "token_login":
+        onTokenLogin();
+        break;
     case "login":
         onLoging();
         break;

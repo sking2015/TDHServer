@@ -46,4 +46,41 @@ class TokenManager
 
         return $playerId ?: false; // 如果不存在返回 false
     }
+
+    public function delSalt($saltId)
+    {
+        $this->redis->del("auth_salt:" . $saltId);
+    }
+
+    public function getSalt($saltId)
+    {
+        return $this->redis->get("auth_salt:" . $saltId);
+    }
+
+    /**
+     * 生成唯一盐值
+     */
+    public function genSalt()
+    {
+        $ip = $_SERVER['REMOTE_ADDR'];
+        // 简单的 IP 限流：每个 IP 每分钟只能取 20 次盐
+        $limitKey = "limit:salt:" . $ip;
+        $count = $this->redis->incr($limitKey);
+        if ($count == 1) $this->redis->expire($limitKey, 60);
+        if ($count > 20) {
+            return false;
+        }
+
+        // 生成随机盐值和 ID
+        $saltId = bin2hex(random_bytes(8)); // 随机标识符
+        $salt = bin2hex(random_bytes(16));  // 真正的盐值
+
+        // 存储到 Redis，设置 300 秒有效期
+        $this->redis->setex("auth_salt:" . $saltId, 300, $salt);
+
+        return [
+            "saltId" => $saltId,
+            "salt" => $salt
+        ];
+    }
 }

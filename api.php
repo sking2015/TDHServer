@@ -148,6 +148,10 @@ function onTokenLogin()
         $account = $userService->getAccountByAuthToken($token);
         if ($account) {
             thowUser($account);
+        } else {
+            echo json_encode([
+                "status"  => "登录信息已经过期，请清空缓存后重新登录",
+            ]);
         }
     }
 }

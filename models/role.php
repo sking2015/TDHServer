@@ -26,6 +26,8 @@ class Role
     public $atk_rate;           //攻击频率    
     public $lvup_exp;           //升级经验
 
+    public $skillsEquip;       //技能装备数据
+
     public function __construct($id)
     {
         $this->userid = $id;

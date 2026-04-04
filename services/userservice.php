@@ -142,6 +142,18 @@ class UserService
             $role = new Role($userid);
             $role->setLevel($roledata["level"]);
 
+            if (isset($roledata["exp"])) {
+                $role->exp = $roledata["exp"];
+            } else {
+                $role->exp = 0;
+            }
+
+            if (isset($roledata["skills_equip"])) {
+                $role->skillsEquip = $roledata["skills_equip"];
+            } else {
+                $role->skillsEquip = "";
+            }
+
             return $role;
         }
 
@@ -153,6 +165,8 @@ class UserService
         $newData = [
             'user_id' => $userid,
             'level'     => 1,
+            'exp'       => 0,
+            'skills_equip' => "", // 初始技能装备数据为空，可以根据需要调整
         ];
 
         $collection->insertOne($newData);

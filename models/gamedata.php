@@ -8,6 +8,7 @@ enum eGameUniMessage: int
     case eum_battleClear = 2; //一个phase战斗完成
     case eum_battleFail = 3; //战斗失败
     case eum_getRoleData = 4; //请求角色数据
+    case eum_saveSkillsEquip = 5; //保存技能装备
 }
 
 
@@ -23,7 +24,11 @@ class GameDataController
     public $unlockProgress;
     public $coin;
     public $diamond;
+    public $exp;
     public $curLevel;               //若保存了当前进度，要一并保存当前等级（以后可能还有其它数据，先就只等级吧）
+
+    public $skillsEquip;           //技能装备数据，暂时不保存，后面再说
+
 
     public function __construct($id, $pdo)
     {
@@ -34,6 +39,7 @@ class GameDataController
         $this->unlockProgress = "0-0";
         $this->coin = 0;
         $this->diamond = 0;
+        $this->exp = 0;
 
         $this->GameDataInit();
     }
@@ -62,7 +68,7 @@ class GameDataController
         SET unlockprogress = ?, 
             currprogress = ?, 
             coin = ?, 
-            diamond = ? 
+            diamond = ?            
         WHERE userid = ?";
 
         // 准备预处理语句
@@ -85,6 +91,19 @@ class GameDataController
         }
     }
 
+    private function saveSkillsEquip()
+    {
+        // 获取数据库对象
+        $db = MongoConn::getDB();
+        $collection = $db->selectCollection('roles');
+
+        $collection->updateOne(
+            ['user_id' => (int)$this->userid],        // 查询条件
+            ['$set' => ['skills_equip' => $this->skillsEquip]],    // 更新指令 (务必带上 $set)
+            ['upsert' => true]             // 关键选项：开启 upsert
+        );
+    }
+
     private function processGameData()
     {
         $progress = $this->curProgress;
@@ -95,7 +114,7 @@ class GameDataController
         $newProgress = $progress;
 
         if ($this->reason == eGameUniMessage::eum_battleClear) {
-            //如果是完成关卡，那么当前phase前进1            
+            //如果是完成关卡，那么重置当前进度，当前关卡重置为0-0            
             if ($phase >= 6) {
                 $this->curProgress = "0-0";
             } else {
@@ -138,6 +157,7 @@ class GameDataController
         $collection->updateOne(
             ['user_id' => (int)$this->userid],        // 查询条件
             ['$set' => ['level' => (int)$this->curLevel]],    // 更新指令 (务必带上 $set)
+            ['$set' => ['exp' => (int)$this->exp]],    // 更新指令 (务必带上 $set)
             ['upsert' => true]             // 关键选项：开启 upsert
         );
     }
@@ -157,10 +177,18 @@ class GameDataController
                 case eGameUniMessage::eum_battleClear:
                 case eGameUniMessage::eum_battleStart:
                 case eGameUniMessage::eum_battleFail:
-                    $this->curProgress = $sPara;
+                    $result = json_decode($sPara, true);
+                    $this->curProgress = $result['progress'];
+                    $this->exp = $result['exp'];
+                    $this->coin = $result['coin'];
+                    $this->diamond = $result['diamond'];
                     $this->curLevel = (int)$nPara;
                     $this->processGameData();
                     $this->saveGameData();
+                    break;
+                case eGameUniMessage::eum_saveSkillsEquip:
+                    $this->skillsEquip = $sPara;
+                    $this->saveSkillsEquip();
                     break;
             }
         }

@@ -27,6 +27,7 @@ class Role
     public $lvup_exp;           //升级经验
 
     public $skillsEquip;       //技能装备数据
+    public $skills;           //技能数据
 
     public function __construct($id)
     {

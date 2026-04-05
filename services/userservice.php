@@ -117,63 +117,13 @@ class UserService
         }
 
 
-        $user->role = $this->getOrCreateRole($user->userid);
+
         $user->token = $this->auth->generateToken($user->userid);
 
         $gamedata = new GameDataController($user->userid, $this->pdo);
+        $user->role = $gamedata->getOrCreateRole($user->userid);
         $user->readGamedata($gamedata);
 
         return $user;
-    }
-
-    public function getOrCreateRole($userid)
-    {
-        // 1. 查询,角色数据不再使用mysql
-        // $stmt = $this->pdo->prepare("SELECT * FROM role_data WHERE user_id = ?");
-        // $stmt->execute([$userid]);
-        // $row = $stmt->fetch();
-
-        $db = MongoConn::getDB();
-        $collection = $db->selectCollection('roles');
-
-        $roledata = $collection->findOne(['user_id' => $userid]);
-
-        if ($roledata) {
-            $role = new Role($userid);
-            $role->setLevel($roledata["level"]);
-
-            if (isset($roledata["exp"])) {
-                $role->exp = $roledata["exp"];
-            } else {
-                $role->exp = 0;
-            }
-
-            if (isset($roledata["skills_equip"])) {
-                $role->skillsEquip = $roledata["skills_equip"];
-            } else {
-                $role->skillsEquip = "";
-            }
-
-            return $role;
-        }
-
-        // // 2. 新建角色
-        $role = new Role($userid);
-        $role->InitDefaultPerproty();
-
-        // 准备数据
-        $newData = [
-            'user_id' => $userid,
-            'level'     => 1,
-            'exp'       => 0,
-            'skills_equip' => "", // 初始技能装备数据为空，可以根据需要调整
-        ];
-
-        $collection->insertOne($newData);
-
-        // $stmt = $this->pdo->prepare("INSERT INTO role_data (user_id, lv,exp,hp, sp, atk, def, cri, crd, atk_rate) VALUES (?,?,?,?,?,?,?,?,?,?)");
-        // $stmt->execute([$userid, $role->level, $role->exp, $role->hp, $role->sp, $role->atk, $role->def, $role->cri, $role->crd, $role->atk_rate]);
-
-        return $role;
     }
 }

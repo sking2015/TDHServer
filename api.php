@@ -33,7 +33,17 @@ require_once __DIR__ . "/models/stage.php";
 require_once __DIR__ . "/models/gamedata.php";
 
 
-$reqType = $_REQUEST["reqtype"] ?? null;
+
+
+// 获取原始输入流
+$json = file_get_contents('php://input');
+// 解码为 PHP 关联数组
+$post_data = json_decode($json, true);
+// 现在可以通过 $post_data['key'] 访问数据了
+
+$reqType = $post_data["reqtype"] ?? null;
+
+
 
 if (!$reqType) {
     echo json_encode(["status" => "error", "message" => "Missing parameter: reqType"]);
@@ -60,9 +70,9 @@ function thowUser($account)
 }
 
 
-function onLoging()
+function onLoging($post_data)
 {
-    $account = $_REQUEST["account"] ?? null;
+    $account = $post_data["account"] ?? null;
     if (!$account) {
         echo json_encode(["status" => "error", "message" => "Missing parameter: account"]);
         exit;
@@ -82,12 +92,12 @@ function onGameInfo()
     ]);
 }
 
-function onLoadStageInfo()
+function onLoadStageInfo($post_data)
 {
-    if (isset($_REQUEST["stageid"]) && isset($_REQUEST["phaseid"])) {
+    if (isset($post_data["stageid"]) && isset($post_data["phaseid"])) {
 
-        $stageid = (int)$_REQUEST["stageid"];
-        $phaseid = (int)$_REQUEST["phaseid"];
+        $stageid = (int)$post_data["stageid"];
+        $phaseid = (int)$post_data["phaseid"];
         $stage = new Stage($stageid);
         $info = $stage->getOnePhaseInfo($phaseid);
         echo json_encode([
@@ -101,18 +111,18 @@ function onLoadStageInfo()
     }
 }
 
-function onGameUniMessage()
+function onGameUniMessage($post_data)
 {
-    if (!isset($_REQUEST["userid"]) || !isset($_REQUEST["token"])) {
+    if (!isset($post_data["userid"]) || !isset($post_data["token"])) {
         echo json_encode([
             "status"  => "协议错误，未检测到userid或token",
         ]);
     }
 
     $userService = new UserService();
-    $userid = $_REQUEST["userid"];
-    if ($userService->verifyToken($userid, $_REQUEST["token"])) {
-        $data = $userService->onGameUniMessage($userid, $_REQUEST["reason"], $_REQUEST["sPara"], $_REQUEST["nPara"]);
+    $userid = $post_data["userid"];
+    if ($userService->verifyToken($userid, $post_data["token"])) {
+        $data = $userService->onGameUniMessage($userid, $post_data["reason"], $post_data["sPara"], $post_data["nPara"]);
         echo json_encode([
             "status"  => "ok",
             "data" => $data
@@ -140,9 +150,9 @@ function onReqSalt()
     }
 }
 
-function onTokenLogin()
+function onTokenLogin($post_data)
 {
-    $token = $_REQUEST["token"] ?? null;
+    $token = $post_data["token"] ?? null;
     if ($token) {
         $userService = new UserService();
         $account = $userService->getAccountByAuthToken($token);
@@ -156,14 +166,14 @@ function onTokenLogin()
     }
 }
 
-function onRegister()
+function onRegister($post_data)
 {
     $userService = new UserService();
 
-    $token = $_REQUEST["token"];
-    $sign = $_REQUEST["sign"];
-    $saltId = $_REQUEST["saltId"];
-    $timestamp = $_REQUEST["timestamp"];
+    $token = $post_data["token"];
+    $sign = $post_data["sign"];
+    $saltId = $post_data["saltId"];
+    $timestamp = $post_data["timestamp"];
 
     //验证token注册账号
     $account = $userService->RegisterUser($token, $sign, $saltId, $timestamp);
@@ -179,21 +189,21 @@ switch ($reqType) {
         onReqSalt();
         break;
     case "register":
-        onRegister();
+        onRegister($post_data);
         break;
     case "token_login":
-        onTokenLogin();
+        onTokenLogin($post_data);
         break;
     case "login":
-        onLoging();
+        onLoging($post_data);
         break;
     case "stageinfo":
-        onLoadStageInfo();
+        onLoadStageInfo($post_data);
         break;
     case "gameinfo":
         onGameInfo();
         break;
     case "uniMessage":
-        onGameUniMessage();
+        onGameUniMessage($post_data);
         break;
 }

@@ -33,6 +33,8 @@ class Role
     {
         $this->userid = $id;
         $this->exp = 0;
+        $this->skillsEquip = "";
+        $this->skills = [];
     }
 
     public function setLevel($level)

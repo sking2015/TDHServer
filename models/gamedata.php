@@ -271,17 +271,19 @@ class GameDataController
                 $role->exp = 0;
             }
 
-            if (isset($roledata["skills_equip"])) {
+            if (isset($roledata["skills_equip"]) && $roledata["skills_equip"] !== null) {
                 $role->skillsEquip = $roledata["skills_equip"];
             } else {
                 $role->skillsEquip = "";
             }
 
-            if (isset($roledata["skills"])) {
+            if (isset($roledata["skills"]) && $roledata["skills"] !== null) {
                 $role->skills = $roledata["skills"];
             } else {
                 $role->skills = [];
             }
+
+
 
             return $role;
         }

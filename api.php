@@ -5,7 +5,9 @@ $allowed_origins = [
     'http://localhost',           // Android Capacitor 默认
     'capacitor://localhost',      // iOS Capacitor 默认
     'http://localhost:7456',       // 你之前的调试地址
-    'http://165.154.203.112'
+    'http://165.154.203.112',
+    'http://165.154.203.112:8080'
+
 ];
 
 // 2. 获取当前请求的 Origin

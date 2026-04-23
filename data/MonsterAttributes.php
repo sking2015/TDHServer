@@ -605,7 +605,7 @@ class MonsterAttributes {
 ],
     41 => [
     'Id' => 41,
-    'Class' => 3,
+    'Class' => 4,
     'Level' => 20,
     'Health' => 1000,
     'Attack' => 50,
@@ -620,7 +620,7 @@ class MonsterAttributes {
 ],
     42 => [
     'Id' => 42,
-    'Class' => 4,
+    'Class' => 5,
     'Level' => 20,
     'Health' => 1200,
     'Attack' => 60,

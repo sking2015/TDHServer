@@ -10,7 +10,7 @@ class MonsterAlloc {
     'Phase3' => '3+5,23+4',
     'Phase4' => '4+6,24+4',
     'Phase5' => '5+2,25+5',
-    'PhaseBoss' => '10+1'
+    'PhaseBoss' => '41+1,42+1'
 ]
 ];
 }

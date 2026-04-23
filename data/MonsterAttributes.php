@@ -602,6 +602,36 @@ class MonsterAttributes {
     'Resistance4' => 0,
     'Exp' => 258,
     'Money' => 435
+],
+    41 => [
+    'Id' => 41,
+    'Class' => 3,
+    'Level' => 20,
+    'Health' => 1000,
+    'Attack' => 50,
+    'Defense' => 50,
+    'MoveSpeed' => 800,
+    'Resistance1' => 0,
+    'Resistance2' => 0,
+    'Resistance3' => 0,
+    'Resistance4' => 0,
+    'Exp' => 500,
+    'Money' => 500
+],
+    42 => [
+    'Id' => 42,
+    'Class' => 4,
+    'Level' => 20,
+    'Health' => 1200,
+    'Attack' => 60,
+    'Defense' => 40,
+    'MoveSpeed' => 900,
+    'Resistance1' => 0,
+    'Resistance2' => 0,
+    'Resistance3' => 0,
+    'Resistance4' => 0,
+    'Exp' => 1000,
+    'Money' => 1000
 ]
 ];
 }
